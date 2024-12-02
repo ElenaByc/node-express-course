@@ -1,5 +1,6 @@
 const http = require("http");
 var StringDecoder = require("string_decoder").StringDecoder;
+const querystring = require('node:querystring');
 const { colors } = require('./colors.js');
 
 const getBody = (req, callback) => {
@@ -8,17 +9,21 @@ const getBody = (req, callback) => {
   req.on("data", function (data) {
     body += decode.write(data);
   });
+  // req.on("end", function () {
+  //   body += decode.end();
+  //   const body1 = decodeURI(body);
+  //   const bodyArray = body1.split("&");
+  //   console.log(bodyArray);
+  //   const resultHash = {};
+  //   bodyArray.forEach((part) => {
+  //     const partArray = part.split("=");
+  //     resultHash[partArray[0]] = partArray[1];
+  //   });
+  //   callback(resultHash);
+  // });
   req.on("end", function () {
     body += decode.end();
-    const body1 = decodeURI(body);
-    const bodyArray = body1.split("&");
-    console.log(bodyArray);
-    const resultHash = {};
-    bodyArray.forEach((part) => {
-      const partArray = part.split("=");
-      resultHash[partArray[0]] = partArray[1];
-    });
-    callback(resultHash);
+    callback(querystring.parse(body));
   });
 };
 
@@ -35,7 +40,7 @@ const getRandomInt = (min, max) => {
 }
 
 const getRandomColor = () => {
-  return colors[randomInt(0, colors.length - 1)];
+  return colors[getRandomInt(0, colors.length - 1)];
 }
 
 const getTenRandomColors = () => {
@@ -104,10 +109,12 @@ const server = http.createServer((req, res) => {
       // here, you can add your own logic
       text = body['text'];
       // text has pluses instead of spaces and %2C instead of commas, %3F instead of ?, etc... is there a method to convert text to normal?
-      const textArr = text.split('+');
-      text = textArr.join(' ').replaceAll('%2C', ',').replaceAll('%3F', '?');
-      bgColor = body['bgColor'].split('%2C+').join(',');
-      color = body['color'].split('%2C+').join(',');
+      // const textArr = text.split('+');
+      // text = textArr.join(' ').replaceAll('%2C', ',').replaceAll('%3F', '?');
+      // bgColor = body['bgColor'].split('%2C+').join(',');
+      // color = body['color'].split('%2C+').join(',');
+      bgColor = body['bgColor'];
+      color = body['color'];
       // Your code changes would end here
       res.writeHead(303, {
         Location: "/",
