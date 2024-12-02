@@ -101,8 +101,8 @@ const form = () => {
 };
 
 const server = http.createServer((req, res) => {
-  console.log("req.method is ", req.method);
-  console.log("req.url is ", req.url);
+  console.log("req.method is", req.method);
+  console.log("req.url is", req.url);
   if (req.method === "POST") {
     getBody(req, (body) => {
       console.log("The body of the post is ", body);
@@ -124,6 +124,10 @@ const server = http.createServer((req, res) => {
   } else {
     res.end(form());
   }
+});
+
+server.on('request', (req) => {
+  console.log('event received:', req.method, req.url);
 });
 
 server.listen(3000);
