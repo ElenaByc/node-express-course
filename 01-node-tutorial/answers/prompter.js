@@ -97,7 +97,7 @@ const form = () => {
       selectElement.style.backgroundColor = selectedOption.style.backgroundColor;
     }
   </script>
-  `; n
+  `;
 };
 
 const server = http.createServer((req, res) => {
