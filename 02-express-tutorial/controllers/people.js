@@ -1,27 +1,18 @@
-let { people } = require('../data')
+const { people } = require('../data')
 
 const getPeople = (req, res) => {
   res.status(200).json({ success: true, data: people })
 }
 
-const createPerson = (req, res) => {
+const addPerson = (req, res) => {
   const { name } = req.body
   if (!name) {
     return res
       .status(400)
-      .json({ success: false, msg: 'please provide name value' })
+      .json({ success: false, message: 'Please provide a name' })
   }
-  res.status(201).send({ success: true, person: name })
-}
-
-const createPersonPostman = (req, res) => {
-  const { name } = req.body
-  if (!name) {
-    return res
-      .status(400)
-      .json({ success: false, msg: 'please provide name value' })
-  }
-  res.status(201).send({ success: true, data: [...people, name] })
+  people.push({ id: people.length + 1, name })
+  res.status(201).json({ success: true, name })
 }
 
 const updatePerson = (req, res) => {
@@ -35,14 +26,14 @@ const updatePerson = (req, res) => {
       .status(404)
       .json({ success: false, msg: `no person with id ${id}` })
   }
-  const newPeople = people.map((person) => {
+  const updatedPeople = people.map((person) => {
     if (person.id === Number(id)) {
       person.name = name
-      console.log('new person', person)
     }
     return person
   })
-  res.status(200).json({ success: true, data: newPeople })
+
+  res.status(200).json({ success: true, data: updatedPeople })
 }
 
 const deletePerson = (req, res) => {
@@ -52,16 +43,16 @@ const deletePerson = (req, res) => {
       .status(404)
       .json({ success: false, msg: `no person with id ${req.params.id}` })
   }
-  const newPeople = people.filter(
+  const updatedPeople = people.filter(
     (person) => person.id !== Number(req.params.id)
   )
-  return res.status(200).json({ success: true, data: newPeople })
+  return res.status(200).json({ success: true, data: updatedPeople })
 }
 
+
 module.exports = {
+  addPerson,
   getPeople,
-  createPerson,
-  createPersonPostman,
   updatePerson,
   deletePerson,
 }
