@@ -38,7 +38,6 @@ const updatePerson = (req, res) => {
   const newPeople = people.map((person) => {
     if (person.id === Number(id)) {
       person.name = name
-      console.log('new person', person)
     }
     return person
   })
