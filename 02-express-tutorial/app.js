@@ -1,55 +1,37 @@
 const express = require('express')
-const { products } = require('./data')
+const cookieParser = require('cookie-parser')
+const peopleRouter = require('./routes/people')
+const productsRouter = require('./routes/products')
+const logger = require('./middleware/logger')
+const auth = require('./middleware/auth')
 
 const app = express()
 const port = 3000
 
-app.use(express.static('./public'))
+app.use(express.static('./methods-public'))
+app.use(logger)
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json())
+app.use(cookieParser())
+app.use('/api/v1/people', peopleRouter)
+app.use('/api/v1/products', productsRouter)
 
-
-app.get('/api/v1/test', (req, res) => {
-  res.json({ message: "It worked!" })
+app.post('/logon', (req, res) => {
+  const { name } = req.body
+  if (!name) {
+    return res.status(400).json({ msg: 'please provide name value' })
+  }
+  res.cookie('name', name)
+  res.status(201).send(`Hello ${name}`)
 })
 
-app.get('/api/v1/products/', (req, res) => {
-  res.json(products)
+app.delete('/logoff', (req, res) => {
+  res.clearCookie('name')
+  res.status(200).json({ msg: 'user logged off' })
 })
 
-app.get('/api/v1/products/:productID', (req, res) => {
-  const idToFind = Number(req.params.productID)
-
-  const product = products.find(
-    (product) => product.id === idToFind
-  )
-  if (!product) {
-    return res.status(404).send(`Product with id = ${req.params.productID} was not found`)
-  }
-
-  return res.json(product)
-})
-
-app.get('/api/v1/query', (req, res) => {
-
-  const { name, price, limit } = req.query
-  let filteredProducts = [...products]
-
-  if (name) {
-    filteredProducts = filteredProducts.filter(product =>
-      product.name.startsWith(name)
-    )
-  }
-  if (price && Number(price) >= 0) {
-    filteredProducts = filteredProducts.filter(product => 
-      product.price <= Number(price)
-    )
-  }
-  if (limit && Number(limit) >= 0) {
-    filteredProducts = filteredProducts.slice(0, Number(limit))
-  }
-  if (filteredProducts.length === 0) {
-    return res.status(200).json({ success: true, data: [] })
-  }
-  res.status(200).json(filteredProducts)
+app.get('/test', auth, (req, res) => {
+  res.status(200).json({ msg: `Welcome ${req.user}` })
 })
 
 app.all('*', (req, res) => {
