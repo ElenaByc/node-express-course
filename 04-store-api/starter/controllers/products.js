@@ -31,6 +31,10 @@ const getAllProducts = async (req, res) => {
       '<=': '$lte',
     }
 
+    // ??? shouldn't we throw an error if the filter is not valid? = has invalid symbols?
+    // sanitize filter by keeping Aa-Zz, 0-9, <, =, >, . 
+    // filter = filter.replace(/[^\w<=>\.]/g, '')
+
     operatorRegex = /\b(>|<|=|>=|<=)\b/g
     let filters = numericFilters.replace(
       operatorRegex,
@@ -38,11 +42,13 @@ const getAllProducts = async (req, res) => {
     )
     console.log('filters:', filters)
 
-    const options = ['price', 'rating']
+    const allowedFields = ['price', 'rating']
     filters = filters.split(',').forEach((item) => {
       const [field, operator, value] = item.split('-')
-      if (options.includes(field)) {
-        queryObject[field] = { [operator]: Number(value) }
+      if (allowedFields.includes(field)) {
+        // if the field is allowed, add it to the queryObject
+        // spread operator to handle filters like price>90,price<=120,rating>=4.5
+        queryObject[field] = { ...queryObject[field], [operator]: Number(value) }
       }
     })
   }
